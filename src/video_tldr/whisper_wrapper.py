@@ -1,8 +1,13 @@
+import logging
 from pathlib import Path
 from typing import Optional
 
 import torch
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
+
+from video_tldr._internal.log import setup_file_logger
+
+logger = setup_file_logger(log_level=logging.INFO)
 
 DEFAULT_MODEL = "openai/whisper-large-v3"
 
@@ -27,6 +32,9 @@ class WhisperWrapper:
         )
         self.model.to(self.device)
 
+        logger.info(f"Using device: {device}")
+        logger.info(f"Loading model {model_id} with output directory {output_dir}")
+
         self.processor = AutoProcessor.from_pretrained(model_id)
 
         self.pipe = pipeline(
@@ -45,6 +53,8 @@ class WhisperWrapper:
         generate_kwargs = {}
         if lang is not None:
             generate_kwargs["language"] = lang
+
+        logger.info(f"Transcribing {audio_path} to text...")
 
         result = self.pipe(audio_path, return_timestamps=True, generate_kwargs=generate_kwargs)
         output_file = self.output_dir / (Path(audio_path).stem + ".txt")

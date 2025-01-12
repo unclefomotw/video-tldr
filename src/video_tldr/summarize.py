@@ -1,9 +1,13 @@
 # For now it only supports Ollama serve as inference
 
+import logging
 from typing import Optional
 
+from video_tldr._internal.log import setup_file_logger
 from video_tldr.ollama import OllamaServer
 from video_tldr.util import split_lines_to_chunks
+
+logger = setup_file_logger(log_level=logging.INFO)
 
 CHUNK_SIZE = 2048
 
@@ -68,6 +72,10 @@ Output only the summary of the portion you are asked to summarize, and nothing e
         context = f"{prev_chunk}\n<SUMMARIZE_THIS>\n{chunks[i]}\n</SUMMARIZE_THIS>\n{next_chunk}"
         user_prompt = user_prompt_tmpl.format(context=context,
                                               chunk_to_summarize=chunks[i])
+
+        logger.info(f"Summarizing chunk {i+1} of {len(chunks)}")
+        logger.debug("Context: %s", context)
+
         chunk_summary = ollama_server.chat(
             messages=[
                 {"role": "system", "content": system_message},
@@ -99,8 +107,8 @@ def summarize_text(text: str,
     if len(chunks) == 0:
         return ""
     elif len(chunks) == 1:
-        print("Single chunk detected. Summarizing whole text...")
+        logger.info("Single chunk detected. Summarizing whole text...")
         return summarize_whole(chunks[0], model_name)
     else:
-        print("Multiple chunks detected. Summarizing each chunk and then combining results...")
+        logger.info("Multiple chunks detected. Summarizing each chunk and then combining results...")
         return summarize_with_context(chunks, model_name)
