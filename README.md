@@ -49,12 +49,30 @@ print(transcription)
 It is suggested that the text is made of lines; each represents a sentence in a reasonable length.
 
 ```python
-from summarizer import summarize_text
+from video_tldr.summarize import summarize_text
 
 # Summarize a text
 text = """Your long text here."""
 summary = summarize_text(text, model_name="your-model")
 print(summary)
+```
+
+### Translation
+
+```python
+from video_tldr.translate import naive_translate
+
+# Example text to be translated
+text_to_translate = "Hello, how are you today? This is a test translation."
+
+# Language to which the text should be translated
+target_language = "es"  # Spanish in this case
+
+# Call the naive_translate function with the example text and target language
+translated_text = naive_translate(text_to_translate, lang=target_language)
+
+# Print the translated text
+print("Translated Text:", translated_text)
 ```
 
 
