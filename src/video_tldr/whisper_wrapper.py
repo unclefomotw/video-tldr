@@ -17,6 +17,14 @@ class WhisperWrapper:
     def __init__(self, model_id: str = DEFAULT_MODEL,
                  device: Optional[str] = None,
                  output_dir: Path | str = "out"):
+        """
+        Initialize the WhisperWrapper with a specified model and device.
+        Args:
+            model_id (str): The name of the Whisper model. Defaults to 'openai/whisper-large-v3'.
+            device (Optional[str]): The device to run the model on ('cuda', 'mps', or 'cpu'). If not provided, it will be automatically selected.
+            output_dir (Path | str): The directory where transcription results will be saved. Defaults to "out"
+        """
+
         if device is None:
             if torch.cuda.is_available():
                 device = "cuda"
@@ -49,7 +57,17 @@ class WhisperWrapper:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-    def transcribe(self, audio_path, lang: Optional[str] = None):
+    def transcribe(self, audio_path, lang: Optional[str] = None) -> str:
+        """
+        Transcribe an audio file to text.
+
+        Args:
+            audio_path (str): Path to the audio file.
+            lang (Optional[str]): Language of the audio file. Defaults to None and will auto detect.
+        Returns:
+            str: Transcribed text. (Also written to a txt file under `output_dir`)
+        """
+
         generate_kwargs = {}
         if lang is not None:
             generate_kwargs["language"] = lang
@@ -67,3 +85,6 @@ class WhisperWrapper:
 
         with open(output_file, "w") as f:
             f.write(whole_text)
+            logger.info(f"Transcript is written to {output_file}")
+
+        return whole_text
