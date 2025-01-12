@@ -57,6 +57,9 @@ class WhisperWrapper:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
+    def get_transcription_path(self, audio_path):
+        return self.output_dir / (Path(audio_path).stem + ".txt")
+
     def transcribe(self, audio_path, lang: Optional[str] = None) -> str:
         """
         Transcribe an audio file to text.
@@ -75,7 +78,7 @@ class WhisperWrapper:
         logger.info(f"Transcribing {audio_path} to text...")
 
         result = self.pipe(audio_path, return_timestamps=True, generate_kwargs=generate_kwargs)
-        output_file = self.output_dir / (Path(audio_path).stem + ".txt")
+        output_file = self.get_transcription_path(audio_path)
 
         whole_text = ""
         for chunk in result["chunks"]: # type: ignore
